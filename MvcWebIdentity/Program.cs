@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using MvcWebIdentity.Context;
+using MvcWebIdentity.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,16 +13,19 @@ ConnectionString(builder);
 AddIdentity(builder);
 ConfiguriLogin(builder);
 AddCookei(builder);
+AddAuthorizationRoles(builder);
+AddRoleUser(builder);
+
 void ConnectionString(WebApplicationBuilder builder)
 {
     var connection = builder.Configuration.GetConnectionString("DefoultConnection");
-    builder.Services.AddDbContext<MvcDbContext>(options =>
+    builder.Services.AddDbContext<AppDbContext>(options =>
             options.UseSqlServer(connection));
 }
 void AddIdentity(WebApplicationBuilder builder)
 {
     builder.Services.AddIdentity<IdentityUser, IdentityRole>()
-            .AddEntityFrameworkStores<MvcDbContext>();
+            .AddEntityFrameworkStores<AppDbContext>();
 }
 void ConfiguriLogin(WebApplicationBuilder builder)
 {
@@ -32,7 +36,6 @@ void ConfiguriLogin(WebApplicationBuilder builder)
         options.Password.RequireNonAlphanumeric = false;
     });
 }
-
 void AddCookei(WebApplicationBuilder builder)
 {
     builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
@@ -43,6 +46,19 @@ void AddCookei(WebApplicationBuilder builder)
             options.SlidingExpiration = true;
         });
 }
+void AddAuthorizationRoles(WebApplicationBuilder builder)
+{
+    builder.Services.AddAuthorization(option =>
+    {
+        option.AddPolicy("RequireUserAdminGerente",
+            policy => policy.RequireRole("User", "Admin", "Gerente"));
+    });
+}
+void AddRoleUser(WebApplicationBuilder builder)
+{
+    builder.Services.AddScoped<ISeedUserRoleInitial, SeedUserRoleInitial>();
+}
+
 
 var app = builder.Build();
 
@@ -59,6 +75,8 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+await CriarPerfisUsuariosAsync(app);
+
 app.UseAuthentication();
 app.UseAuthorization();
 
@@ -67,3 +85,16 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.Run();
+
+async Task CriarPerfisUsuariosAsync(WebApplication app)
+{
+    var scopedFatory = app.Services.GetService<IServiceScopeFactory>();
+
+    using (var scope = scopedFatory.CreateScope())
+    {
+        var service = scope.ServiceProvider.GetService<ISeedUserRoleInitial>();
+        await service.SeedRolesAsync();
+        await service.SeedUsersAsync();
+    }
+
+}

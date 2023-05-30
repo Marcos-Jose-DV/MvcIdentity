@@ -14,14 +14,15 @@ namespace MvcWebIdentity.Controllers
     [Authorize]
     public class AlunosController : Controller
     {
-        private readonly MvcDbContext _context;
+        private readonly AppDbContext _context;
 
-        public AlunosController(MvcDbContext context)
+        public AlunosController(AppDbContext context)
         {
             _context = context;
         }
 
         // GET: Alunos
+        [AllowAnonymous]
         public async Task<IActionResult> Index()
         {
               return _context.Alunos != null ? 
@@ -30,6 +31,8 @@ namespace MvcWebIdentity.Controllers
         }
 
         // GET: Alunos/Details/5
+        [Authorize(Roles = "User, Admin, Gerente")]
+        [Authorize(Policy = "RequireUserAdminGerente")]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null || _context.Alunos == null)
@@ -48,6 +51,8 @@ namespace MvcWebIdentity.Controllers
         }
 
         // GET: Alunos/Create
+        //[Authorize(Roles = "User, Admin, Gerente")]
+        [Authorize(Policy = "RequireUserAdminGerente")]
         public IActionResult Create()
         {
             return View();
@@ -70,6 +75,7 @@ namespace MvcWebIdentity.Controllers
         }
 
         // GET: Alunos/Edit/5
+        [Authorize(Roles = "Admin, Gerente")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null || _context.Alunos == null)
@@ -121,6 +127,7 @@ namespace MvcWebIdentity.Controllers
         }
 
         // GET: Alunos/Delete/5
+        [Authorize(Roles = "Gerente")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null || _context.Alunos == null)

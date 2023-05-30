@@ -10,7 +10,7 @@ using MvcWebIdentity.Context;
 
 namespace MvcWebIdentity.Migrations
 {
-    [DbContext(typeof(MvcDbContext))]
+    [DbContext(typeof(AppDbContext))]
     partial class MvcDbContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)

@@ -5,9 +5,9 @@ using MvcWebIdentity.Entities;
 
 namespace MvcWebIdentity.Context
 {
-    public class MvcDbContext : IdentityDbContext
+    public class AppDbContext : IdentityDbContext
     {
-        public MvcDbContext(DbContextOptions<MvcDbContext> options) :
+        public AppDbContext(DbContextOptions<AppDbContext> options) :
             base(options)
         { }
 

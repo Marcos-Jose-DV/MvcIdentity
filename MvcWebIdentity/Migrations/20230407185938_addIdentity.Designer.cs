@@ -11,7 +11,7 @@ using MvcWebIdentity.Context;
 
 namespace MvcWebIdentity.Migrations
 {
-    [DbContext(typeof(MvcDbContext))]
+    [DbContext(typeof(AppDbContext))]
     [Migration("20230407185938_addIdentity")]
     partial class addIdentity
     {
